@@ -1,3 +1,5 @@
+"use strict";
+
 /** Textual markov chain generator. */
 
 class MarkovMachine {
@@ -25,21 +27,19 @@ class MarkovMachine {
    * */
 
   getChains() {
-    // TODO: implement this!
-    let words = this.words;
-    let markovContainer = {};
+    const words = this.words;
+    let markovContainer = new Map();
+
 
     for (let i = 0; i < words.length; i++) {
-      let nextWord = words[i+1] || null
-      if (markovContainer[words[i]] === undefined) {
-        markovContainer[words[i]] = [nextWord];
+      const nextWord = words[i + 1] || null;
+      if (!markovContainer.has(words[i])) {
+        markovContainer.set(words[i], [nextWord]);
       } else {
-        if (markovContainer[words[i]]) {
-          markovContainer[words[i]].push(nextWord);
-        }
+        markovContainer.get(words[i]).push(nextWord);
       }
     }
-    
+
     return markovContainer;
   }
 
@@ -51,15 +51,28 @@ class MarkovMachine {
     // - start at the first word in the input text
     // - find a random word from the following-words of that
     // - repeat until reaching the terminal null
-    let markovStory = "" ;
     let word = this.words[0];
-    let wordChoices = this.chains[word];
-    let nextWord = Math.floor(Math.random() * wordChoices.length)
-    
-     
+    let markovStory = [word];
+    function findNextWord(choices) {
+      return choices[Math.floor(Math.random() * choices.length)];
+    }
+
+    while (word !== null) {
+      const wordChoices = this.chains.get(word);
+      word = findNextWord(wordChoices);
+      markovStory.push(word);
+    }
+    return markovStory.join(" ");
+
   }
 }
 
-const catInHatMachine = new MarkovMachine("the cat in the hat");
+//order of loop, doing things twice in set up and loop
+
+let content = `The constructor you function. The contains some code The.
+              to get The you started you some input text The. to get The you
+              started you some input text`;
+const catInHatMachine = new MarkovMachine(content);
 console.log("words", catInHatMachine.words);
 console.log("chains", catInHatMachine.chains);
+console.log("story=", catInHatMachine.getText());
